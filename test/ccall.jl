@@ -1966,3 +1966,14 @@ let llvm = sprint(code_llvm, world_counter, ())
     # the world age should be -1 in generated functions (or other pure contexts)
     @test (generated_world_counter() == reinterpret(UInt, -1))
 end
+
+function gc_safe_ccall()
+    @ccall gc_safe=true jl_get_cpu_features()::String
+end
+
+let llvm = sprint(code_llvm, gc_safe_ccall, ())
+    # check that the call works
+    @test gc_safe_ccall() isa String
+    # check for the gc_safe store
+    @test occursin("store atomic i8 2", llvm)
+end
