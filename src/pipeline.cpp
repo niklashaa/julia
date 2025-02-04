@@ -487,6 +487,14 @@ static void buildScalarOptimizerPipeline(FunctionPassManager &FPM, PassBuilder *
             FPM.addPass(IRCEPass());
             FPM.addPass(JumpThreadingPass());
             FPM.addPass(ConstraintEliminationPass());
+        } else if (O.getSpeedupLevel() >= 1) {
+            JULIA_PASS(FPM.addPass(AllocOptPass()));
+            FPM.addPass(SROAPass(SROAOptions::ModifyCFG));
+            FPM.addPass(MemCpyOptPass());
+            FPM.addPass(SCCPPass());
+            FPM.addPass(BDCEPass());
+            FPM.addPass(InstCombinePass());
+            FPM.addPass(ADCEPass());
         }
         if (O.getSpeedupLevel() >= 3) {
             FPM.addPass(GVNPass());
@@ -504,7 +512,8 @@ static void buildScalarOptimizerPipeline(FunctionPassManager &FPM, PassBuilder *
             }
             FPM.addPass(SimplifyCFGPass(aggressiveSimplifyCFGOptions()));
             FPM.addPass(InstCombinePass());
-        }
+        } else if (O.getSpeedupLevel() >= 1) 
+            FPM.addPass(SimplifyCFGPass(aggressiveSimplifyCFGOptions()));
         invokeScalarOptimizerCallbacks(FPM, PB, O);
     }
     FPM.addPass(AfterScalarOptimizationMarkerPass());
