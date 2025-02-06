@@ -271,7 +271,6 @@ The above input outputs this:
 function ccall_macro_parse(exprs)
     gc_safe = false
     expr = nothing
-    ccall(:jl_, Cvoid, (Any,), exprs)
     if exprs isa Expr
         expr = exprs
     elseif length(exprs) == 1
