@@ -438,9 +438,9 @@ name, if desired `"libglib-2.0".g_uri_escape_string(...`
 It's possible to declare the ccall as `gc_safe` by using the `gc_safe = true` option:
     @ccall gc_safe=true strlen(s::Cstring)::Csize_t
 This allows the garbage collector to run concurrently with the ccall, which can be useful whenever
-the ccall may block outside of julia.
+the `ccall` may block outside of julia.
 WARNING: This option should be used with caution, as it can lead to undefined behavior if the ccall
-calls back into the julia runtime. (@cfunction/@ccallables are safe however)
+calls back into the julia runtime. (`@cfunction`/`@ccallables` are safe however)
 """
 macro ccall(exprs...)
     return ccall_macro_lower((:ccall), ccall_macro_parse(exprs)...)

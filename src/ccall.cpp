@@ -1428,8 +1428,6 @@ static jl_cgval_t emit_ccall(jl_codectx_t &ctx, jl_value_t **args, size_t nargs)
     assert(jl_is_quotenode(args[5]));
     jl_value_t *jlcc = jl_quotenode_value(args[5]);
     jl_sym_t *cc_sym = NULL;
-    // TODO: Can we introduce a intrinsic token = @julia.gc_safe_begin()
-    //       and "grow" gc safe regions so that we minimize the overhead?
     bool gc_safe = false;
     if (jl_is_symbol(jlcc)) {
         cc_sym = (jl_sym_t*)jlcc;
