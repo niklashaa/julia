@@ -512,7 +512,7 @@ static void buildScalarOptimizerPipeline(FunctionPassManager &FPM, PassBuilder *
             }
             FPM.addPass(SimplifyCFGPass(aggressiveSimplifyCFGOptions()));
             FPM.addPass(InstCombinePass());
-        } else if (O.getSpeedupLevel() >= 1) 
+        } else if (O.getSpeedupLevel() >= 1)
             FPM.addPass(SimplifyCFGPass(aggressiveSimplifyCFGOptions()));
         invokeScalarOptimizerCallbacks(FPM, PB, O);
     }
@@ -527,8 +527,7 @@ static void buildVectorPipeline(FunctionPassManager &FPM, PassBuilder *PB, Optim
         LoopPassManager LPM;
         LPM.addPass(LoopRotatePass());
         LPM.addPass(LoopDeletionPass());
-        FPM.addPass(createFunctionToLoopPassAdaptor(
-            std::move(LPM), /*UseMemorySSA=*/false, /*UseBlockFrequencyInfo=*/false));
+        FPM.addPass(createFunctionToLoopPassAdaptor(std::move(LPM), /*UseMemorySSA=*/false, /*UseBlockFrequencyInfo=*/false));
         FPM.addPass(LoopDistributePass());
         FPM.addPass(InjectTLIMappings());
         FPM.addPass(LoopVectorizePass());

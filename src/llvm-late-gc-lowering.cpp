@@ -1170,22 +1170,22 @@ State LateLowerGCFrame::LocalScan(Function &F) {
                         if (AllocaInst *OneSRet = dyn_cast<AllocaInst>(SRetArg)) {
                             allocas.push_back(OneSRet);
                         } else {
-                            SmallVector<Value *> worklist;
-                            worklist.push_back(SRetArg);
+                            SmallSetVector<Value *, 8> worklist;
+                            worklist.insert(SRetArg);
                             while (!worklist.empty()) {
                                 Value *V = worklist.pop_back_val();
                                 if (AllocaInst *Alloca = dyn_cast<AllocaInst>(V->stripInBoundsOffsets())) {
                                     allocas.push_back(Alloca);
                                 } else if (PHINode *Phi = dyn_cast<PHINode>(V)) {
                                     for (Value *Incoming : Phi->incoming_values()) {
-                                        worklist.push_back(Incoming);
+                                        worklist.insert(Incoming);
                                     }
                                 } else if (SelectInst *SI = dyn_cast<SelectInst>(SRetArg)) {
                                     AllocaInst *TrueSRet = dyn_cast<AllocaInst>(SI->getTrueValue());
                                     AllocaInst *FalseSRet = dyn_cast<AllocaInst>(SI->getFalseValue());
                                     if (TrueSRet && FalseSRet) {
-                                        worklist.push_back(TrueSRet);
-                                        worklist.push_back(FalseSRet);
+                                        worklist.insert(TrueSRet);
+                                        worklist.insert(FalseSRet);
                                     } else {
                                         llvm_dump(SI);
                                         assert(false && "Malformed Select");
@@ -1197,11 +1197,11 @@ State LateLowerGCFrame::LocalScan(Function &F) {
                             }
                         }
                         assert(allocas.size() > 0);
-                        assert(std::all_of(allocas.begin(), allocas.end(), [&] (AllocaInst* SRetAlloca)
-                        {
-                          return (SRetAlloca->getArraySize() == allocas[0]->getArraySize() &&
-                          SRetAlloca->getAllocatedType() == allocas[0]->getAllocatedType());
-                        }));
+                        assert(std::all_of(allocas.begin(), allocas.end(), [&] (AllocaInst* SRetAlloca){
+                                return (SRetAlloca->getArraySize() == allocas[0]->getArraySize() &&
+                                SRetAlloca->getAllocatedType() == allocas[0]->getAllocatedType());
+                            }
+                        ));
                         for (AllocaInst *SRet : allocas) {
                             if (!(SRet->isStaticAlloca() && isa<PointerType>(ElT) && ElT->getPointerAddressSpace() == AddressSpace::Tracked)) {
                                 assert(!tracked.derived);
@@ -1238,11 +1238,11 @@ State LateLowerGCFrame::LocalScan(Function &F) {
                                     }
 
                                     assert(gc_allocas.size() > 0);
-                                    assert(std::all_of(gc_allocas.begin(), gc_allocas.end(), [&] (AllocaInst* SRetAlloca)
-                                    {
-                                        return (SRetAlloca->getArraySize() == (*gc_allocas.begin())->getArraySize() &&
-                                        SRetAlloca->getAllocatedType() == (*gc_allocas.begin())->getAllocatedType());
-                                    }));
+                                    assert(std::all_of(gc_allocas.begin(), gc_allocas.end(), [&] (AllocaInst* SRetAlloca){
+                                            return (SRetAlloca->getArraySize() == (*gc_allocas.begin())->getArraySize() &&
+                                            SRetAlloca->getAllocatedType() == (*gc_allocas.begin())->getAllocatedType());
+                                        }
+                                    ));
                                     for (AllocaInst *SRet_gc : gc_allocas) {
                                         if (!(SRet_gc->isStaticAlloca() && isa<PointerType>(ElT) && ElT->getPointerAddressSpace() == AddressSpace::Tracked))
                                             S.ArrayAllocas[SRet_gc] = tracked.count * cast<ConstantInt>(SRet_gc->getArraySize())->getZExtValue();
