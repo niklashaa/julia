@@ -312,7 +312,7 @@ if bc_opt == bc_default
         for ET in [Int, Float32, Union{Int, Float64}]
             no_allocate(T{ET}) #compile
             # allocations aren't removed for Union eltypes which they theoretically could be eventually
-            test_alloc(T{ET}, broken=(ET==Union{Int, Float64}))
+            test_alloc(T{ET}, broken=(ET==Union{Int, Float64} && T == Memory))
         end
     end
     function f() # this was causing a bug on an in progress version of #55913.

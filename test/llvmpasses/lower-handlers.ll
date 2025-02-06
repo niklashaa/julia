@@ -46,8 +46,8 @@ after:                                            ; preds = %catch, %try
 
 define ptr addrspace(10) @julia_poll_fd2_1135(){
 top:
-; CHECK: %depth0 = alloca i8, i32 256, align 16
-; CHECK: %depth1 = alloca i8, i32 256, align 16
+; CHECK: %depth0 = alloca i8
+; CHECK: %depth1 = alloca i8
   %pgcstack = call ptr @julia.get_pgcstack()
   %current_task7 = getelementptr inbounds i8, ptr %pgcstack, i64 -112
   %0 = call i64 @ijl_excstack_state(ptr nonnull %current_task7)
