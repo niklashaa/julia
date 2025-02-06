@@ -1745,6 +1745,7 @@ using Base: ccall_macro_parse, ccall_macro_lower
         :Cvoid,                           # returntype
         Any[:Cstring, :Cstring, :Cint],   # argument types
         Any["%s = %d\n", :name, :value],  # argument symbols
+        false,                            # is gc_safe
         1                                 # number of required arguments (for varargs)
     )
 end
@@ -1757,7 +1758,7 @@ end
     )::Cstring))...)
     @test call == Base.remove_linenums!(
         quote
-        ccall($(Expr(:escape, :((:func, libstring)))), $(Expr(:cconv, :ccall, 0)), $(Expr(:escape, :Cstring)), ($(Expr(:escape, :Cstring)), $(Expr(:escape, :Cint)), $(Expr(:escape, :Cint))), $(Expr(:escape, :str)), $(Expr(:escape, :num1)), $(Expr(:escape, :num2)))
+        ccall($(Expr(:escape, :((:func, libstring)))), $(Expr(:cconv, (:ccall, UInt16(0), false), 0)), $(Expr(:escape, :Cstring)), ($(Expr(:escape, :Cstring)), $(Expr(:escape, :Cint)), $(Expr(:escape, :Cint))), $(Expr(:escape, :str)), $(Expr(:escape, :num1)), $(Expr(:escape, :num2)))
         end)
 
     local fptr = :x
