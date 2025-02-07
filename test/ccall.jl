@@ -1969,7 +1969,7 @@ let llvm = sprint(code_llvm, world_counter, ())
 end
 
 function gc_safe_ccall()
-    @ccall gc_safe=true jl_get_cpu_features()::String
+    @ccall gc_safe=true sleep(1::Cint)::Cvoid
 end
 
 let llvm = sprint(code_llvm, gc_safe_ccall, ())
